@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deploy บน Hostatom — คู่มือภาพรวม</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg:        #f6f8fc;
+      --surface:   #ffffff;
+      --border:    #e2e8f0;
+      --border-med:#c8d5e8;
+      --ink:       #0f1923;
+      --ink-2:     #3d4f66;
+      --ink-3:     #64748b;
+      --brand:     #1d5ce8;
+      --brand-dim: #e8effe;
+      --brand-mid: #b8cafc;
+      --green:     #0d7a52;
+      --green-bg:  #e6f5ef;
+      --green-bd:  #a8d9c4;
+      --amber:     #92590a;
+      --amber-bg:  #fef7e8;
+      --amber-bd:  #f0cc80;
+      --red:       #b42318;
+      --red-bg:    #fef2f2;
+      --red-bd:    #f0b8b8;
+      --radius:    10px;
+      --shadow:    0 1px 4px rgba(15,25,35,.06), 0 4px 16px rgba(15,25,35,.05);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    /* ─── LAYOUT ─── */
+    .wrapper {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      grid-template-rows: auto 1fr;
+      min-height: 100vh;
+      max-width: 1260px;
+      margin: 0 auto;
+    }
+
+    /* ─── SIDEBAR NAV ─── */
+    .sidebar {
+      grid-row: 1 / 3;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 28px 0 40px;
+    }
+
+    .sidebar-brand {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .sidebar-brand .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .sidebar-brand .logo-icon {
+      width: 28px; height: 28px;
+      background: var(--brand);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar-brand .logo-icon svg { width:15px; height:15px; }
+
+    .sidebar-brand .logo-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .sidebar-brand .logo-sub {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--ink-3);
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      padding: 0 20px;
+      margin-bottom: 6px;
+    }
+
+    .nav-list {
+      list-style: none;
+    }
+
+    .nav-list a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-2);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all .15s;
+    }
+
+    .nav-list a:hover {
+      background: var(--brand-dim);
+      color: var(--brand);
+      border-left-color: var(--brand-mid);
+    }
+
+    .nav-list a .nav-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink-3);
+      min-width: 16px;
+    }
+
+    /* ─── TOPBAR ─── */
+    .topbar {
+      grid-column: 2;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 40px 28px;
+    }
+
+    .topbar-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--brand);
+      margin-bottom: 6px;
+    }
+
+    .topbar h1 {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--ink);
+    }
+
+    .topbar-sub {
+      font-size: 14px;
+      color: var(--ink-2);
+      margin-top: 8px;
+      max-width: 680px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 16px;
+    }
+
+    .tag {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--brand-dim);
+      color: var(--brand);
+      border: 1px solid var(--brand-mid);
+    }
+
+    /* ─── CONTENT ─── */
+    .content {
+      grid-column: 2;
+      padding: 36px 40px 80px;
+    }
+
+    /* ─── SECTION ─── */
+    .doc-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 30px;
+      margin-bottom: 20px;
+      scroll-margin-top: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .section-num {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--brand);
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 20px 0 8px;
+      letter-spacing: .01em;
+    }
+
+    p { color: var(--ink-2); margin: 8px 0; }
+
+    a { color: var(--brand); text-decoration: none; font-weight: 600; }
+    a:hover { text-decoration: underline; }
+
+    /* ─── CARD GRID ─── */
+    .grid3 {
+      display: grid;
+      grid-template-columns: repeat(3,minmax(0,1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: #fafcff;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .card p {
+      font-size: 13px;
+      margin: 0;
+      color: var(--ink-3);
+    }
+
+    /* ─── STEPS ─── */
+    .steps { margin-top: 4px; }
+
+    .step {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 14px;
+      padding: 16px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .step:first-child { border-top: 0; padding-top: 4px; }
+
+    .step-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--brand-mid);
+      color: var(--brand);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step h3 { margin-top: 0; }
+
+    /* ─── ALERTS ─── */
+    .alert {
+      border-radius: 8px;
+      padding: 11px 14px;
+      margin: 14px 0;
+      border: 1px solid;
+      font-size: 14px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .alert-icon { flex-shrink: 0; margin-top: 1px; }
+
+    .alert-info  { background: var(--brand-dim); border-color: var(--brand-mid); color: #1a3a8f; }
+    .alert-ok    { background: var(--green-bg);  border-color: var(--green-bd);  color: var(--green); }
+    .alert-warn  { background: var(--amber-bg);  border-color: var(--amber-bd);  color: var(--amber); }
+    .alert-danger{ background: var(--red-bg);    border-color: var(--red-bd);    color: var(--red); }
+
+    /* ─── CODE ─── */
+    code {
+      font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .875em;
+      background: #eef2f8;
+      color: #1a335c;
+      border-radius: 5px;
+      padding: 1px 6px;
+    }
+
+    pre {
+      font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: #0f1923;
+      color: #cbd5e1;
+      border-radius: 8px;
+      padding: 14px 18px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 12px 0;
+    }
+
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; border-radius: 0; }
+
+    .pre-wrap {
+      position: relative;
+    }
+
+    .pre-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      margin-bottom: 4px;
+    }
+
+    /* ─── TABLE ─── */
+    .table-wrap { overflow-x: auto; margin: 14px 0; border-radius: 8px; border: 1px solid var(--border); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: .02em;
+      color: var(--ink-2);
+      border-bottom: 1px solid var(--border-med);
+    }
+
+    /* ─── CHECKLIST ─── */
+    .checklist { list-style: none; padding: 0; }
+
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      font-size: 14px;
+      color: var(--ink-2);
+      border-top: 1px solid var(--border);
+    }
+
+    .checklist li:first-child { border-top: 0; }
+
+    .check-box {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border-med);
+      border-radius: 5px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ─── LISTS ─── */
+    ul { padding-left: 20px; }
+    ul li { margin: 5px 0; color: var(--ink-2); font-size: 14px; }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--ink-3);
+      margin-top: 16px;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .wrapper {
+        display: block;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .topbar { padding: 20px; }
+      .content { padding: 20px; }
+      .grid3  { grid-template-columns: 1fr; }
+      .doc-section { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <!-- ─── SIDEBAR ─── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <a href="#" class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <path d="M8 21h8M12 17v4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="logo-text">Hostatom Deploy</div>
+          <div class="logo-sub">คู่มือภาพรวม</div>
+        </div>
+      </a>
+    </div>
+    <div class="nav-label">สารบัญ</div>
+    <ul class="nav-list">
+      <li><a href="#plan">   <span class="nav-num">01</span> วางแผนก่อน deploy</a></li>
+      <li><a href="#stack">  <span class="nav-num">02</span> ภาษาและเทคโนโลยี</a></li>
+      <li><a href="#domain"> <span class="nav-num">03</span> Domain / Subdomain</a></li>
+      <li><a href="#database"><span class="nav-num">04</span> ฐานข้อมูล</a></li>
+      <li><a href="#env">    <span class="nav-num">05</span> Environment variables</a></li>
+      <li><a href="#local">  <span class="nav-num">06</span> ทดสอบบน local</a></li>
+      <li><a href="#build">  <span class="nav-num">07</span> เตรียม build</a></li>
+      <li><a href="#upload"> <span class="nav-num">08</span> อัปโหลดไฟล์</a></li>
+      <li><a href="#runtime"><span class="nav-num">09</span> ตั้งค่า runtime</a></li>
+      <li><a href="#restart"><span class="nav-num">10</span> Restart &amp; ตรวจผล</a></li>
+      <li><a href="#problems"><span class="nav-num">11</span> ปัญหาที่พบบ่อย</a></li>
+      <li><a href="#handoff"><span class="nav-num">12</span> Checklist ส่งมอบ</a></li>
+    </ul>
+  </aside>
+
+  <!-- ─── TOPBAR ─── -->
+  <header class="topbar">
+    <div class="topbar-eyebrow">Hostatom / Plesk</div>
+    <h1>ภาพรวมการนำโปรเจกต์ขึ้น Hostatom</h1>
+    <p class="topbar-sub">
+      คู่มือสำหรับเตรียมโปรเจกต์เว็บให้พร้อม deploy ขึ้น Hostatom/Plesk
+      ใช้ได้กับ HTML/PHP, Node.js, Next.js, React, Laravel และ WordPress
+    </p>
+    <div class="tags">
+      <span class="tag">Subdomain</span>
+      <span class="tag">Recommended Stack</span>
+      <span class="tag">Database</span>
+      <span class="tag">Environment Variables</span>
+      <span class="tag">Node.js App</span>
+      <span class="tag">SSL / HTTPS</span>
+      <span class="tag">Local Testing</span>
+    </div>
+  </header>
+
+  <!-- ─── MAIN CONTENT ─── -->
+  <main class="content">
+
+    <!-- 1 วางแผน -->
+    <section class="doc-section" id="plan">
+      <div class="section-header">
+        <div class="section-num">1</div>
+        <h2>วางแผนก่อน deploy</h2>
+      </div>
+      <p>ก่อนนำโปรเจกต์ขึ้น host ให้ตอบคำถามเหล่านี้ให้ครบ เพื่อไม่สับสนระหว่างไฟล์ โดเมน และฐานข้อมูล</p>
+      <div class="grid3">
+        <div class="card">
+          <span class="card-title">เว็บจะอยู่ที่ไหน?</span>
+          <p>เช่น <code>app.example.com</code> หรือ <code>example.com/project</code></p>
+        </div>
+        <div class="card">
+          <span class="card-title">โปรเจกต์เป็นชนิดไหน?</span>
+          <p>Static, PHP, Node.js, Next.js, Laravel, WordPress</p>
+        </div>
+        <div class="card">
+          <span class="card-title">ต้องใช้ฐานข้อมูลไหม?</span>
+          <p>ถ้าใช้ ต้องมี database name, user, password, host, port</p>
+        </div>
+      </div>
+      <div class="alert alert-info">
+        <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>หลักคิดคือ "โดเมนชี้ไปที่โฟลเดอร์" — "runtime รันไฟล์เริ่มต้น" — "แอปอ่าน config จาก env" ถ้าสามอย่างนี้ตรงกัน ระบบจะ debug ง่ายมาก</span>
+      </div>
+    </section>
+
+    <!-- 2 Stack -->
+    <section class="doc-section" id="stack">
+      <div class="section-header">
+        <div class="section-num">2</div>
+        <h2>ภาษาและเทคโนโลยีที่แนะนำ</h2>
+      </div>
+      <p>Hostatom/Plesk รองรับเว็บหลายแบบ โดยเฉพาะ PHP และ Node.js ถ้าเริ่มโปรเจกต์ใหม่และต้องการทำเว็บแอปสมัยใหม่ ตัวเลือกยอดนิยมคือ <strong>Next.js + TypeScript + Tailwind CSS</strong></p>
+      <div class="grid3" style="margin-bottom:16px">
+        <div class="card">
+          <span class="card-title">แนะนำที่สุดสำหรับเว็บแอปใหม่</span>
+          <p><code>Next.js</code> + <code>TypeScript</code> + <code>Tailwind CSS</code></p>
+        </div>
+        <div class="card">
+          <span class="card-title">เว็บทั่วไป / ระบบหลังบ้าน</span>
+          <p><code>PHP</code>, <code>Laravel</code>, <code>WordPress</code></p>
+        </div>
+        <div class="card">
+          <span class="card-title">เว็บหน้าเดียว / static</span>
+          <p><code>React + Vite</code>, HTML / CSS / JS</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>Stack</th>
+            <th>เหมาะกับงาน</th>
+            <th>สิ่งที่ต้องเตรียมบน Hostatom</th>
+          </tr>
+          <tr>
+            <td><code>Next.js + TypeScript + Tailwind</code></td>
+            <td>เว็บแอป, dashboard, ระบบสมาชิก, API, ระบบที่ต้องขยายต่อ</td>
+            <td>เปิด Node.js App, build โปรเจกต์, ตั้ง startup file, ตั้ง <code>.env</code></td>
+          </tr>
+          <tr>
+            <td><code>React + Vite + TypeScript</code></td>
+            <td>เว็บหน้าเดียว, admin panel ที่เรียก API จากที่อื่น</td>
+            <td>รัน <code>npm run build</code> แล้วอัปโหลด <code>dist/</code></td>
+          </tr>
+          <tr>
+            <td><code>Laravel</code></td>
+            <td>ระบบ CRUD, backend, งานองค์กร</td>
+            <td>ตั้ง PHP version, Composer dependencies, document root → <code>public/</code></td>
+          </tr>
+          <tr>
+            <td><code>WordPress</code></td>
+            <td>เว็บโรงเรียน, ข่าวสาร, บทความ</td>
+            <td>ติดตั้งผ่าน WordPress Toolkit หรืออัปโหลดไฟล์แล้วเชื่อมฐาน</td>
+          </tr>
+          <tr>
+            <td><code>PHP ธรรมดา</code></td>
+            <td>เว็บเล็ก, ฟอร์มง่าย ๆ, deploy ง่ายที่สุด</td>
+            <td>อัปโหลดไฟล์ PHP และตั้งค่า database/config</td>
+          </tr>
+        </table>
+      </div>
+      <div class="alert alert-ok">
+        <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>ถ้าทำระบบใหม่ที่มี login, dashboard, ตารางข้อมูล และต้องแก้ต่อในอนาคต เลือก <strong>Next.js + TypeScript + Tailwind CSS</strong> เป็นค่าเริ่มต้นได้เลย</span>
+      </div>
+      <div class="alert alert-warn">
+        <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>ก่อนเลือก Node.js/Next.js ให้ตรวจใน Hostatom ว่ามีเมนู Node.js App, เลือก Node.js version ได้ และ restart app ได้จาก Plesk</span>
+      </div>
+    </section>
+
+    <!-- 3 Domain -->
+    <section class="doc-section" id="domain">
+      <div class="section-header">
+        <div class="section-num">3</div>
+        <h2>เตรียม Domain หรือ Subdomain</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <h3>สร้าง subdomain ใน Hostatom/Plesk</h3>
+            <p>ถ้าโปรเจกต์แยกจากเว็บหลัก ให้สร้าง subdomain ใหม่ เช่น:</p>
+            <pre><code>project.example.com
+admin.example.com
+checkin.example.com</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <h3>จำชื่อโฟลเดอร์ที่ Hostatom สร้างให้</h3>
+            <p>Plesk จะสร้างโฟลเดอร์ชื่อตาม subdomain เช่น <code>project.example.com/</code> — โฟลเดอร์นี้คือจุดที่จะอัปโหลดไฟล์</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <h3>เปิด SSL</h3>
+            <p>หลังสร้าง subdomain ให้ไปที่ SSL / Let's Encrypt แล้วออก certificate ให้โดเมนนั้น</p>
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-warn">
+        <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>ถ้าเห็นหน้า "Domain Default page" ของ Plesk แปลว่าโดเมนชี้ถูกแล้ว แต่ยังไม่ได้อัปโหลดโปรเจกต์ หรือมีไฟล์ <code>index.html</code> default บังอยู่</span>
+      </div>
+    </section>
+
+    <!-- 4 Database -->
+    <section class="doc-section" id="database">
+      <div class="section-header">
+        <div class="section-num">4</div>
+        <h2>เตรียมฐานข้อมูล</h2>
+      </div>
+      <p>ข้ามส่วนนี้ได้ถ้าโปรเจกต์ไม่มีฐานข้อมูล สำหรับ Hostatom/Plesk ตัวเลือกที่เหมาะที่สุดคือ <strong>MariaDB/MySQL</strong></p>
+
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>ประเภทฐานข้อมูล</th>
+            <th>เหมาะกับงาน</th>
+            <th>คำแนะนำบน Hostatom</th>
+          </tr>
+          <tr>
+            <td><code>MariaDB / MySQL</code></td>
+            <td>ระบบทั่วไป, login, dashboard, CRUD, WordPress, Laravel, Next.js</td>
+            <td>แนะนำเป็นค่าเริ่มต้นสำหรับโปรเจกต์ส่วนใหญ่</td>
+          </tr>
+          <tr>
+            <td><code>PostgreSQL</code></td>
+            <td>query ซับซ้อน, data integrity สูง</td>
+            <td>ใช้ได้ถ้า hosting มีบริการให้ หรือใช้ cloud database ภายนอก</td>
+          </tr>
+          <tr>
+            <td><code>SQLite</code></td>
+            <td>prototype, demo, app ที่มีผู้ใช้น้อย</td>
+            <td>ไม่แนะนำสำหรับ production ที่มีหลายผู้ใช้</td>
+          </tr>
+          <tr>
+            <td><code>MongoDB / NoSQL</code></td>
+            <td>ข้อมูลเอกสาร, schema เปลี่ยนบ่อย</td>
+            <td>มักต้องใช้บริการภายนอก เช่น MongoDB Atlas</td>
+          </tr>
+        </table>
+      </div>
+
+      <h3>หลักออกแบบ schema</h3>
+      <ul>
+        <li>ตั้งชื่อตารางเป็นภาษาอังกฤษ สั้น ชัดเจน เช่น <code>users</code>, <code>roles</code></li>
+        <li>ทุกตารางหลักควรมี primary key เช่น <code>id</code> auto increment หรือ UUID</li>
+        <li>เก็บเวลามาตรฐานด้วย <code>created_at</code> และ <code>updated_at</code></li>
+        <li>ใช้ foreign key หรืออย่างน้อยออกแบบความสัมพันธ์ให้ชัด</li>
+        <li>ทำ index ให้คอลัมน์ที่ใช้ค้นหาบ่อย เช่น <code>email</code>, <code>status</code></li>
+        <li>รหัสผ่านต้องเก็บเป็น hash เท่านั้น ห้ามเก็บ plaintext</li>
+        <li>แยก master data ออกจาก transaction data</li>
+        <li>เตรียมไฟล์ <code>schema.sql</code> หรือ migration ไว้เสมอ</li>
+      </ul>
+
+      <h3>ตัวอย่างโครงสร้างตารางพื้นฐาน</h3>
+      <pre><code>users       → id, name, email, password_hash, role_id, created_at, updated_at
+roles       → id, name
+settings    → id, setting_key, setting_value
+activity_logs → id, user_id, action, created_at</code></pre>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <h3>สร้าง database และ user</h3>
+            <div class="table-wrap">
+              <table>
+                <tr><th>รายการ</th><th>ตัวอย่าง</th></tr>
+                <tr><td>Host</td><td><code>localhost:3306</code></td></tr>
+                <tr><td>Database name</td><td><code>project_db</code></td></tr>
+                <tr><td>User name</td><td><code>project_user</code></td></tr>
+                <tr><td>Password</td><td>เก็บในที่ปลอดภัย ห้าม commit ลง git</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <h3>นำ schema/data เข้า database</h3>
+            <p>ใช้ phpMyAdmin, Adminer, migration command หรือ SQL import ตาม framework ที่ใช้</p>
+            <pre><code>mysql -h localhost -P 3306 -u project_user -p project_db &lt; schema.sql</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-ok">
+        <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>หลัง import ให้ตรวจจำนวน table และข้อมูลเริ่มต้น เช่น admin user, config, master data ที่ระบบต้องใช้</span>
+      </div>
+    </section>
+
+    <!-- 5 Env -->
+    <section class="doc-section" id="env">
+      <div class="section-header">
+        <div class="section-num">5</div>
+        <h2>เตรียม Environment Variables</h2>
+      </div>
+      <p>แอปจริงไม่ควร hardcode password, token หรือ connection string ในโค้ด ให้เก็บในไฟล์ <code>.env</code> หรือช่อง Environment Variables ของ Hostatom</p>
+
+      <h3>ตัวอย่างสำหรับ Node.js / Next.js</h3>
+      <pre><code>DATABASE_URL=mysql://project_user:DB_PASSWORD@localhost:3306/project_db
+JWT_SECRET=your-long-random-secret
+NODE_ENV=production</code></pre>
+
+      <h3>หลักการเลือก host ฐานข้อมูล</h3>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>แอปรันที่ไหน</th>
+            <th>Database host ที่มักใช้</th>
+          </tr>
+          <tr>
+            <td>รันบน Hostatom และฐานอยู่ Hostatom เดียวกัน</td>
+            <td><code>localhost:3306</code></td>
+          </tr>
+          <tr>
+            <td>รันในเครื่อง local แต่ต่อฐานจริงบน host</td>
+            <td>IP หรือ hostname ที่ Hostatom อนุญาตให้ต่อจากภายนอก</td>
+          </tr>
+          <tr>
+            <td>รันกับฐานภายนอก เช่น cloud database</td>
+            <td>connection string ของบริการนั้น</td>
+          </tr>
+        </table>
+      </div>
+      <div class="alert alert-danger">
+        <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <span>ห้ามอัปโหลด <code>.env.local</code>, password จริง, token จริง หรือ private key ขึ้น GitHub</span>
+      </div>
+    </section>
+
+    <!-- 6 Local test -->
+    <section class="doc-section" id="local">
+      <div class="section-header">
+        <div class="section-num">6</div>
+        <h2>ทดสอบบนเครื่อง Local ก่อน Deploy</h2>
+      </div>
+      <p>ก่อนอัปโหลดขึ้น Hostatom ควรรันโปรเจกต์บนเครื่องตัวเองให้ผ่านก่อน โดยเฉพาะ Node.js/Next.js เพราะปัญหาเรื่อง dependency, Node version และ cache จะเจอได้ตั้งแต่ขั้นนี้</p>
+
+      <h3>ตรวจ Node.js version</h3>
+      <p>ให้ใช้เวอร์ชันเดียวกับที่ระบุใน <code>package.json</code> หรือที่ Hostatom รองรับ เช่น <code>20.x</code> หรือ <code>22.x</code></p>
+      <pre><code>node -v
+npm -v</code></pre>
+      <div class="alert alert-warn">
+        <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>ถ้าโปรเจกต์ระบุ <code>"engines": { "node": "22.x" }</code> แต่เครื่อง local ใช้ <code>24.x</code> อาจเจอ error แปลก ๆ ตอน runtime ให้สลับมาใช้ Node 22</span>
+      </div>
+
+      <h3>ติดตั้ง dependency และรัน dev</h3>
+      <pre><code>npm install
+npm run dev</code></pre>
+      <p>เปิดเว็บตาม URL ที่ terminal แสดง เช่น <code>http://localhost:3000</code></p>
+
+      <h3>ทดสอบ build ก่อน deploy</h3>
+      <pre><code>npm run build</code></pre>
+      <p>ถ้า build ไม่ผ่าน ให้แก้ให้เรียบร้อยก่อนอัปโหลด เพราะ server debug ยากกว่าเครื่อง local มาก</p>
+
+      <h3>แก้ปัญหา: <code>Cannot read properties of undefined (reading 'call')</code></h3>
+      <p>มักเกิดจาก cache/chunk ของ Next.js หรือ Webpack เพี้ยน, dev server เก่าค้าง หรือ Node version ไม่ตรง</p>
+      <pre><code># 1) หยุด dev server ก่อน (Ctrl + C)
+
+# 2) ล้าง cache
+rm -rf .next
+
+# 3) รันใหม่
+npm run dev</code></pre>
+      <p>จากนั้น hard refresh browser:</p>
+      <pre><code>Mac: Cmd + Shift + R    |    Windows: Ctrl + Shift + R</code></pre>
+      <div class="alert alert-info">
+        <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>ถ้ายังไม่หาย ลองเปิด Incognito/Private Window หรือเปลี่ยน port ชั่วคราว: <code>npm run dev -- -p 3001</code></span>
+      </div>
+    </section>
+
+    <!-- 7 Build -->
+    <section class="doc-section" id="build">
+      <div class="section-header">
+        <div class="section-num">7</div>
+        <h2>เตรียม Build จากเครื่อง</h2>
+      </div>
+      <p>ขั้นตอนนี้ขึ้นกับชนิดโปรเจกต์</p>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>ชนิดโปรเจกต์</th>
+            <th>สิ่งที่ต้องเตรียม</th>
+          </tr>
+          <tr>
+            <td>HTML/CSS/JS static</td>
+            <td>อัปโหลดไฟล์ตรงได้ เช่น <code>index.html</code>, <code>assets/</code></td>
+          </tr>
+          <tr>
+            <td>PHP</td>
+            <td>อัปโหลดไฟล์ PHP และตั้งค่า database/config</td>
+          </tr>
+          <tr>
+            <td>React / Vite static build</td>
+            <td>รัน <code>npm run build</code> แล้วอัปโหลด <code>dist/</code></td>
+          </tr>
+          <tr>
+            <td>Next.js / Node.js</td>
+            <td>ต้องมี runtime Node.js, <code>.next/</code>, <code>node_modules/</code>, startup file</td>
+          </tr>
+        </table>
+      </div>
+      <h3>ตัวอย่างคำสั่ง Node.js / Next.js</h3>
+      <pre><code>npm install
+npm run build</code></pre>
+      <div class="alert alert-info">
+        <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>ถ้า Hostatom มี Terminal หรือปุ่ม NPM install ให้ติดตั้ง dependency บน server ได้ แต่ถ้าไม่มี ต้องอัปโหลด <code>node_modules/</code> จากเครื่อง local ขึ้นไปด้วย</span>
+      </div>
+    </section>
+
+    <!-- 8 Upload -->
+    <section class="doc-section" id="upload">
+      <div class="section-header">
+        <div class="section-num">8</div>
+        <h2>อัปโหลดไฟล์ขึ้น Hostatom</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <h3>เข้า FTP</h3>
+            <p>ใช้ FTP account ของ Hostatom แล้วเข้าโฟลเดอร์ subdomain หรือ document root ที่ต้องการ</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <h3>อัปโหลดไฟล์ตามชนิดโปรเจกต์</h3>
+            <p>สำหรับ Next.js/Node.js ที่ build ในเครื่อง ควรมีอย่างน้อย:</p>
+            <pre><code>.next/
+node_modules/
+public/
+app.js หรือ server.js
+package.json
+package-lock.json
+next.config.mjs
+.env</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <h3>ลบไฟล์ default ที่ไม่ใช้</h3>
+            <p>ถ้า Hostatom สร้าง <code>index.html</code> default มาให้ และโปรเจกต์เป็น Node.js/Next.js ให้ลบออก เพราะอาจบังหน้าเว็บจริง</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 Runtime -->
+    <section class="doc-section" id="runtime">
+      <div class="section-header">
+        <div class="section-num">9</div>
+        <h2>ตั้งค่า Runtime</h2>
+      </div>
+      <h3>สำหรับ Node.js App</h3>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>ช่องใน Hostatom/Plesk</th>
+            <th>ความหมาย</th>
+            <th>ตัวอย่าง</th>
+          </tr>
+          <tr>
+            <td>Application root</td>
+            <td>โฟลเดอร์ที่มีไฟล์แอป</td>
+            <td><code>project.example.com</code></td>
+          </tr>
+          <tr>
+            <td>Application startup file</td>
+            <td>ไฟล์ที่ Passenger ใช้เริ่มแอป</td>
+            <td><code>app.js</code> หรือ <code>server.js</code></td>
+          </tr>
+          <tr>
+            <td>Node.js version</td>
+            <td>เวอร์ชัน Node ที่แอปรองรับ</td>
+            <td><code>20.x</code> หรือ <code>22.x</code></td>
+          </tr>
+          <tr>
+            <td>Application mode</td>
+            <td>โหมดการรัน</td>
+            <td><code>production</code></td>
+          </tr>
+        </table>
+      </div>
+      <h3>ตัวอย่าง startup file สำหรับ Next.js</h3>
+      <pre><code>const next = require('next');
+const { createServer } = require('http');
+
+const port = process.env.PORT || 3000;
+const app = next({ dev: false });
+const handle = app.getRequestHandler();
+
+app.prepare().then(() =&gt; {
+  createServer((req, res) =&gt; handle(req, res)).listen(port);
+});</code></pre>
+    </section>
+
+    <!-- 10 Restart -->
+    <section class="doc-section" id="restart">
+      <div class="section-header">
+        <div class="section-num">10</div>
+        <h2>Restart และตรวจผล</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <h3>Restart app</h3>
+            <p>กด Restart ในหน้า Node.js App หรืออัปเดตไฟล์ restart marker ถ้า host ใช้ Passenger:</p>
+            <pre><code>tmp/restart.txt</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <h3>เปิดหน้าเว็บจริง</h3>
+            <pre><code>https://project.example.com/</code></pre>
+            <p>ต้องเห็นหน้าแอปจริง ไม่ใช่หน้า default ของ Plesk</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <h3>ทดสอบ endpoint สำคัญ</h3>
+            <p>เช่น login, dashboard, health check, API ที่อ่านฐานข้อมูล</p>
+            <pre><code>https://project.example.com/login
+https://project.example.com/api/health
+https://project.example.com/api/stats</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 Problems -->
+    <section class="doc-section" id="problems">
+      <div class="section-header">
+        <div class="section-num">11</div>
+        <h2>ปัญหาที่พบบ่อย</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tr>
+            <th>อาการ</th>
+            <th>สาเหตุที่พบบ่อย</th>
+            <th>แนวทางแก้</th>
+          </tr>
+          <tr>
+            <td>เห็นหน้า Domain Default page</td>
+            <td>ยังมีไฟล์ default หรือ runtime ยังไม่ได้ผูกกับ subdomain</td>
+            <td>ลบ <code>index.html</code> default และตรวจ Application root</td>
+          </tr>
+          <tr>
+            <td>500 Web application could not be started</td>
+            <td>Passenger start app ไม่ได้</td>
+            <td>ตรวจ startup file, Node version, <code>node_modules</code>, build output และ log</td>
+          </tr>
+          <tr>
+            <td>API ต่อ database ไม่ได้</td>
+            <td><code>.env</code> ผิด, database user ไม่มีสิทธิ์, host/port ผิด</td>
+            <td>ตรวจ connection string และลอง query database โดยตรง</td>
+          </tr>
+          <tr>
+            <td>CSS/JS หาย</td>
+            <td>อัปโหลด build assets ไม่ครบ</td>
+            <td>อัปโหลด <code>dist/</code>, <code>.next/static</code> หรือ <code>public/</code> ใหม่</td>
+          </tr>
+          <tr>
+            <td><code>Cannot read properties of undefined (reading 'call')</code></td>
+            <td>Next.js/Webpack cache เพี้ยน, browser cache เก่า, Node version ไม่ตรง</td>
+            <td>หยุด dev server, ลบ <code>.next</code>, รัน <code>npm run dev</code> ใหม่ และ hard refresh</td>
+          </tr>
+          <tr>
+            <td>เว็บเปิด HTTP ได้ แต่ HTTPS ไม่ได้</td>
+            <td>ยังไม่ได้ออก SSL หรือ certificate ไม่ตรง subdomain</td>
+            <td>ออก Let's Encrypt ใหม่ให้ subdomain</td>
+          </tr>
+        </table>
+      </div>
+      <h3>ไฟล์ log ที่ควรดู</h3>
+      <ul>
+        <li><code>logs/DOMAIN/error_log</code></li>
+        <li><code>logs/DOMAIN/proxy_error_log</code></li>
+        <li><code>tmp/boot-error.log</code> ถ้าแอปมีระบบเขียน boot log เอง</li>
+      </ul>
+    </section>
+
+    <!-- 12 Checklist -->
+    <section class="doc-section" id="handoff">
+      <div class="section-header">
+        <div class="section-num">12</div>
+        <h2>Checklist ก่อนส่งมอบ</h2>
+      </div>
+      <ul class="checklist">
+        <li><div class="check-box"></div><span>Domain/subdomain เปิดผ่าน HTTPS ได้</span></li>
+        <li><div class="check-box"></div><span>หน้าแรกเป็นหน้าโปรเจกต์จริง ไม่ใช่หน้า default ของ Plesk</span></li>
+        <li><div class="check-box"></div><span>API สำคัญตอบ 200</span></li>
+        <li><div class="check-box"></div><span>ระบบ login หรือ workflow หลักใช้งานได้</span></li>
+        <li><div class="check-box"></div><span>ฐานข้อมูลมี table และ seed data ที่จำเป็น</span></li>
+        <li><div class="check-box"></div><span>ไฟล์ <code>.env</code> บน server ถูกต้อง</span></li>
+        <li><div class="check-box"></div><span>ไม่มีไฟล์รหัสผ่านจริงถูก commit ขึ้น GitHub</span></li>
+        <li><div class="check-box"></div><span>มี README หรือคู่มือ deploy สำหรับรอบต่อไป</span></li>
+        <li><div class="check-box"></div><span>สำรองฐานข้อมูลก่อนเปิดใช้งานจริงหรือก่อนลบฐานเก่า</span></li>
+      </ul>
+    </section>
+
+    <footer class="footer">
+      คู่มือภาพรวมสำหรับนำโปรเจกต์เว็บขึ้น Hostatom/Plesk
+    </footer>
+
+  </main>
+
+</div>
+</body>
+</html>
